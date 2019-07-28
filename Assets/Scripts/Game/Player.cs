@@ -12,13 +12,14 @@ namespace Game
         private Rigidbody _rigidBody;
         private MeshRenderer _meshRenderer;
         private bool _moveIsStart;
+        private Vector2 _startSwipePosition;
 
         protected override void Start()
         {
             base.Start();
             this.LoadComponent(ref _meshRenderer).material = MaterialController.Instance.GetPlayerMaterial();
         }
-        
+
         void Update()
         {
 #if UNITY_EDITOR
@@ -27,6 +28,30 @@ namespace Game
             CheckMove(KeyCode.RightArrow, Vector3.right);
             CheckMove(KeyCode.LeftArrow, Vector3.left);
 #else
+            if (Input.touchCount > 0)
+            {
+                var currentTouch = Input.touches[0];
+                switch (currentTouch.phase)
+                {
+                    case TouchPhase.Began:
+                        _startSwipePosition = currentTouch.position;
+                        if (!_moveIsStart)
+                        {
+                            _moveIsStart = true;
+                            MoveStarted.Call();
+                        }
+                        break;
+                    case TouchPhase.Moved:
+                        var force = new Vector3
+                        (
+                            currentTouch.position.x - _startSwipePosition.x,
+                            0,
+                            currentTouch.position.y - _startSwipePosition.y
+                        );
+                        this.LoadComponent(ref _rigidBody).AddForce(force * 0.25f);
+                        break;
+                }
+            }
 #endif
         }
 

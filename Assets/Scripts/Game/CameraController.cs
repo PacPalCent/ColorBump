@@ -25,7 +25,7 @@ namespace Game
         private void OnPlayerMoveStarted()
         {
             Player.Instance.MoveStarted -= OnPlayerMoveStarted;
-            _moveDelta = 0.1f;
+            _moveDelta = 0.05f;
         }
     }
 }
